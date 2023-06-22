@@ -37,10 +37,10 @@ logger = logging.getLogger(__name__)
 CALCULATE, TRADE, DECISION = range(3)
 
 # allowed FX symbols
-SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NOW', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD']
+#SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NOW', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD']
 
 # RISK FACTOR
-RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
+#RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
 
 
 # Helper Functions
@@ -87,8 +87,8 @@ def ParseSignal(signal: str) -> dict:
     trade['Symbol'] = (signal[0].split())[-1].upper()
     
     # checks if the symbol is valid, if not, returns an empty dictionary
-    if(trade['Symbol'] not in SYMBOLS):
-        return {}
+    #if(trade['Symbol'] not in SYMBOLS):
+        #return {}
     
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
     if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell'):
@@ -97,15 +97,19 @@ def ParseSignal(signal: str) -> dict:
     else:
         trade['Entry'] = float((signal[1].split())[-1])
     
-    trade['StopLoss'] = float((signal[2].split())[-1])
-    trade['TP'] = [float((signal[3].split())[-1])]
+    trade['StopLoss'] = float((signal[4].split())[-1])
+    trade['TP'] = [float((signal[5].split())[-1])]
 
     # checks if there's a fourth line and parses it for TP2
-    if(len(signal) > 4):
-        trade['TP'].append(float(signal[4].split()[-1]))
+    if(len(signal) > 5):
+        trade['TP'].append(float(signal[6].split()[-1]))
+    if(len(signal) > 6):
+        trade['TP'].append(float(signal[7].split()[-1]))
+
+    trade['Multiplier'] = float((signal[3].split())[-1])
     
     # adds risk factor to trade
-    trade['RiskFactor'] = RISK_FACTOR
+    #trade['RiskFactor'] = RISK_FACTOR
 
     return trade
 
@@ -132,15 +136,18 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
         multiplier = 0.0001
 
     # calculates the stop loss in pips
-    stopLossPips = abs(round((trade['StopLoss'] - trade['Entry']) / multiplier))
+    #stopLossPips = abs(round((trade['StopLoss'] - trade['Entry']) / multiplier))
+    stopLossPips = abs(round((trade['StopLoss'] - trade['Entry']) / trade['Multiplier']))
 
     # calculates the position size using stop loss and RISK FACTOR
-    trade['PositionSize'] = math.floor(((balance * trade['RiskFactor']) / stopLossPips) / 10 * 100) / 100
-
+    #trade['PositionSize'] = math.floor(((balance * trade['RiskFactor']) / stopLossPips) / 10 * 100) / 100
+    trade['PositionSize'] = float((signal[2].split())[-1])
+    
     # calculates the take profit(s) in pips
     takeProfitPips = []
     for takeProfit in trade['TP']:
-        takeProfitPips.append(abs(round((takeProfit - trade['Entry']) / multiplier)))
+        #takeProfitPips.append(abs(round((takeProfit - trade['Entry']) / multiplier)))
+        takeProfitPips.append(abs(round((takeProfit - trade['Entry']) / trade['Multiplier'])))
 
     # creates table with trade information
     table = CreateTable(trade, balance, stopLossPips, takeProfitPips)
@@ -182,7 +189,10 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     table.add_row(['Position Size', trade['PositionSize']])
     
     table.add_row(['\nCurrent Balance', '\n$ {:,.2f}'.format(balance)])
-    table.add_row(['Potential Loss', '$ {:,.2f}'.format(round((trade['PositionSize'] * 10) * stopLossPips, 2))])
+
+    #round((trade['PositionSize'] * 10) * stopLossPips, 2)
+    potentialLoss = round((trade['PositionSize'] * 10) * stopLossPips * len(takeProfitPips), 2)
+    table.add_row(['Potential Loss', '$ {:,.2f}'.format(potentialLoss)])
 
     # total potential profit from trade
     totalProfit = 0
@@ -195,7 +205,10 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
         totalProfit += profit
 
     table.add_row(['\nTotal Profit', '\n$ {:,.2f}'.format(totalProfit)])
-
+    
+    risk = round(((potentialLoss * 100) / balance))
+    table.add_row(['\nRisk', '\n{:,.0f} %'.format(risk)])
+                   
     return table
 
 async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
