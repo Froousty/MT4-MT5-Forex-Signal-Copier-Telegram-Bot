@@ -123,17 +123,17 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     """
 
     # calculates the stop loss in pips
-    if(trade['Symbol'] == 'XAUUSD'):
-        multiplier = 0.1
+    # if(trade['Symbol'] == 'XAUUSD'):
+    #     multiplier = 0.1
 
-    elif(trade['Symbol'] == 'XAGUSD'):
-        multiplier = 0.001
+    # elif(trade['Symbol'] == 'XAGUSD'):
+    #     multiplier = 0.001
 
-    elif(str(trade['Entry']).index('.') >= 2):
-        multiplier = 0.01
+    # elif(str(trade['Entry']).index('.') >= 2):
+    #     multiplier = 0.01
 
-    else:
-        multiplier = 0.0001
+    # else:
+    #     multiplier = 0.0001
 
     # calculates the stop loss in pips
     #stopLossPips = abs(round((trade['StopLoss'] - trade['Entry']) / multiplier))
@@ -176,27 +176,25 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     table.field_names = ["Key", "Value"]
     table.align["Key"] = "l"  
     table.align["Value"] = "l" 
-
+    
     table.add_row([trade["OrderType"] , trade["Symbol"]])
     table.add_row(['Entry\n', trade['Entry']])
-
+    
+    table.add_row(['\nPosition Size', trade['PositionSize']])
+    risk = round(((potentialLoss * 100) / balance))
+    table.add_row(['\nRisk', '\n{:,.0f} %'.format(risk)])
+    table.add_row(['\nMultiplier\n', trade['Multiplier']])
+    
     table.add_row(['Stop Loss', '{} pips'.format(stopLossPips)])
-
+    
     for count, takeProfit in enumerate(takeProfitPips):
         table.add_row([f'TP {count + 1}', f'{takeProfit} pips'])
-
-    table.add_row(['\nRisk Factor', '\n{:,.0f} %'.format(trade['RiskFactor'] * 100)])
-    table.add_row(['Position Size', trade['PositionSize']])
     
     table.add_row(['\nCurrent Balance', '\n$ {:,.2f}'.format(balance)])
 
-    #round((trade['PositionSize'] * 10) * stopLossPips, 2)
-    potentialLoss = round((trade['PositionSize'] * 10) * stopLossPips * len(takeProfitPips), 2)
-    table.add_row(['Potential Loss', '$ {:,.2f}'.format(potentialLoss)])
-
     # total potential profit from trade
     totalProfit = 0
-
+    
     for count, takeProfit in enumerate(takeProfitPips):
         profit = round((trade['PositionSize'] * 10 * (1 / len(takeProfitPips))) * takeProfit, 2)
         table.add_row([f'TP {count + 1} Profit', '$ {:,.2f}'.format(profit)])
@@ -205,10 +203,10 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
         totalProfit += profit
 
     table.add_row(['\nTotal Profit', '\n$ {:,.2f}'.format(totalProfit)])
+    #round((trade['PositionSize'] * 10) * stopLossPips, 2)
+    potentialLoss = round((trade['PositionSize'] * 10) * stopLossPips * len(takeProfitPips), 2)
+    table.add_row(['Potential Loss', '$ {:,.2f}'.format(potentialLoss)])
     
-    risk = round(((potentialLoss * 100) / balance))
-    table.add_row(['\nRisk', '\n{:,.0f} %'.format(risk)])
-                   
     return table
 
 async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
@@ -276,32 +274,34 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                 # executes buy market execution order
                 if(trade['OrderType'] == 'Buy'):
                     for takeProfit in trade['TP']:
-                        result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                        # result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                        result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'], trade['StopLoss'], takeProfit)
 
                 # executes buy limit order
-                elif(trade['OrderType'] == 'Buy Limit'):
-                    for takeProfit in trade['TP']:
-                        result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                # elif(trade['OrderType'] == 'Buy Limit'):
+                #     for takeProfit in trade['TP']:
+                #         result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
 
-                # executes buy stop order
-                elif(trade['OrderType'] == 'Buy Stop'):
-                    for takeProfit in trade['TP']:
-                        result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                # # executes buy stop order
+                # elif(trade['OrderType'] == 'Buy Stop'):
+                #     for takeProfit in trade['TP']:
+                #         result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
 
                 # executes sell market execution order
                 elif(trade['OrderType'] == 'Sell'):
                     for takeProfit in trade['TP']:
-                        result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                        # result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                        result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'], trade['StopLoss'], takeProfit)
 
                 # executes sell limit order
-                elif(trade['OrderType'] == 'Sell Limit'):
-                    for takeProfit in trade['TP']:
-                        result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                # elif(trade['OrderType'] == 'Sell Limit'):
+                #     for takeProfit in trade['TP']:
+                #         result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
 
-                # executes sell stop order
-                elif(trade['OrderType'] == 'Sell Stop'):
-                    for takeProfit in trade['TP']:
-                        result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                # # executes sell stop order
+                # elif(trade['OrderType'] == 'Sell Stop'):
+                #     for takeProfit in trade['TP']:
+                #         result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
                 
                 # sends success message to user
                 update.effective_message.reply_text("Trade entered successfully! 💰")
@@ -347,7 +347,7 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
         
         except Exception as error:
             logger.error(f'Error: {error}')
-            errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n\nPlease re-enter trade with this format:\n\nBUY/SELL SYMBOL\nEntry \nSL \nTP \n\nOr use the /cancel to command to cancel this action."
+            errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n\nPlease re-enter trade with this format:\n\nBUY/SELL SYMBOL\nEntry \nLOTS \nMultiplier \nSL \nTP \n\nOr use the /cancel to command to cancel this action."
             update.effective_message.reply_text(errorMessage)
 
             # returns to TRADE state to reattempt trade parsing
@@ -386,7 +386,7 @@ def CalculateTrade(update: Update, context: CallbackContext) -> int:
         
         except Exception as error:
             logger.error(f'Error: {error}')
-            errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n\nPlease re-enter trade with this format:\n\nBUY/SELL SYMBOL\nEntry \nSL \nTP \n\nOr use the /cancel to command to cancel this action."
+            errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n\nPlease re-enter trade with this format:\n\nBUY/SELL SYMBOL\nEntry \nLOTS \nMultiplier \nSL \nTP \n\nOr use the /cancel to command to cancel this action."
             update.effective_message.reply_text(errorMessage)
 
             # returns to CALCULATE to reattempt trade parsing
