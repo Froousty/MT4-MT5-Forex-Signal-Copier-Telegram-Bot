@@ -238,13 +238,11 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                 # executes buy market execution order
                 if(trade['OrderType'] == 'Buy'):
                     for takeProfit in trade['TP']:
-                        # result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
                         result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'], trade['StopLoss'], takeProfit)
 
                 # executes sell market execution order
                 elif(trade['OrderType'] == 'Sell'):
                     for takeProfit in trade['TP']:
-                        # result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
                         result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'], trade['StopLoss'], takeProfit)
              
                 # sends success message to user
@@ -341,7 +339,7 @@ def CalculateTrade(update: Update, context: CallbackContext) -> int:
     asyncio.run(ConnectMetaTrader(update, context.user_data['trade'], False))
 
     # asks if user if they would like to enter or decline trade
-    update.effective_message.reply_text("Would you like to enter this trade?\nTo enter, select: /yes\nTo decline, select: /no")
+    update.effective_message.reply_text("Souhaitez-vous envoyer cette transaction ? Pour l'envoyer, sélectionnez : /oui\nPour annuler, sélectionnez : /non")
 
     return DECISION
     
@@ -354,10 +352,10 @@ def unknown_command(update: Update, context: CallbackContext) -> None:
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
     if(not(update.effective_message.chat.username == TELEGRAM_USER)):
-        update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
+        update.effective_message.reply_text("Vous n'êtes pas autorisé à utiliser ce robot ! 🙅🏽‍♂️")
         return
 
-    update.effective_message.reply_text("Unknown command. Use /trade to place a trade or /calculate to find information for a trade. You can also use the /help command to view instructions for this bot.")
+    update.effective_message.reply_text("Commande inconnue. Utilisez /trade pour placer une transaction ou /calculate pour obtenir des informations sur une transaction. Vous pouvez également utiliser la commande /help pour consulter les instructions relatives à ce robot.")
 
     return
 
@@ -371,7 +369,7 @@ def welcome(update: Update, context: CallbackContext) -> None:
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
 
-    welcome_message = "Welcome to the FX Signal Copier Telegram Bot! 💻💸\n\nYou can use this bot to enter trades directly from Telegram and get a detailed look at your risk to reward ratio with profit, loss, and calculated lot size. You are able to change specific settings such as allowed symbols, risk factor, and more from your personalized Python script and environment variables.\n\nUse the /help command to view instructions and example trades."
+    welcome_message = "Bienvenue sur le bot Telegram de FX Signal Copier ! 💻💸\NVous pouvez utiliser ce bot pour entrer dans les transactions directement à partir de Telegram et obtenir un aperçu détaillé de votre ratio risque-récompense avec le profit, la perte. Vous êtes en mesure de modifier des paramètres spécifiques tels que les symboles autorisés, le facteur de risque, et plus encore à partir de votre script Python personnalisé et des variables d'environnement.\nUtilisez la commande /help pour afficher des instructions et des exemples de transactions."
     
     # sends messages to user
     update.effective_message.reply_text(welcome_message)
@@ -387,17 +385,15 @@ def help(update: Update, context: CallbackContext) -> None:
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
 
-    help_message = "This bot is used to automatically enter trades onto your MetaTrader account directly from Telegram. To begin, ensure that you are authorized to use this bot by adjusting your Python script or environment variables.\n\nThis bot supports all trade order types (Market Execution, Limit, and Stop)\n\nAfter an extended period away from the bot, please be sure to re-enter the start command to restart the connection to your MetaTrader account."
-    commands = "List of commands:\n/start : displays welcome message\n/help : displays list of commands and example trades\n/trade : takes in user inputted trade for parsing and placement\n/calculate : calculates trade information for a user inputted trade"
+    help_message = "Ce robot est utilisé pour entrer automatiquement des transactions sur votre compte MetaTrader directement à partir de Telegram. Pour commencer, assurez-vous que vous êtes autorisé à utiliser ce robot en ajustant votre script Python ou vos variables d'environnement.\nAprès une longue période d'absence du robot, assurez-vous de saisir à nouveau la commande start pour redémarrer la connexion à votre compte MetaTrader."
+    commands = "Liste des commandes:\n/start : affiche le message de bienvenue\n/help : affiche la liste des commandes et des exemples de transactions\n/trade : prend en charge la transaction saisie par l'utilisateur pour l'analyser et la placer\n/calculate : calcule les informations de transaction pour une transaction saisie par l'utilisateur".
     trade_example = "Example Trades 💴:\n\n"
     market_execution_example = "Market Execution:\nBUY GBPUSD\nEntry NOW\nLOTS 0.01\nMultiplier 1\nSL 1.14336\nTP 1.28930\nTP 1.29845\nTP 1.29999\n\n"
-    limit_example = "Limit Execution:\nBUY LIMIT GBPUSD\nEntry 1.14480\nSL 1.14336\nTP 1.28930\n\n"
-    note = "You are able to enter up to two take profits. If two are entered, both trades will use half of the position size, and one will use TP1 while the other uses TP2.\n\nNote: Use 'NOW' as the entry to enter a market execution trade."
-
+    
     # sends messages to user
     update.effective_message.reply_text(help_message)
     update.effective_message.reply_text(commands)
-    update.effective_message.reply_text(trade_example + market_execution_example + limit_example + note)
+    update.effective_message.reply_text(trade_example + market_execution_example)
 
     return
     
@@ -410,7 +406,7 @@ def cancel(update: Update, context: CallbackContext) -> int:
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
 
-    update.effective_message.reply_text("Command has been canceled.")
+    update.effective_message.reply_text("La commande a été annulée.")
 
     # removes trade from user context data
     context.user_data['trade'] = None
@@ -439,14 +435,14 @@ def Trade_Command(update: Update, context: CallbackContext) -> int:
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
     if(not(update.effective_message.chat.username == TELEGRAM_USER)):
-        update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
+        update.effective_message.reply_text("Vous n'êtes pas autorisé à utiliser ce robot ! 🙅🏽‍♂️")
         return ConversationHandler.END
     
     # initializes the user's trade as empty prior to input and parsing
     context.user_data['trade'] = None
     
     # asks user to enter the trade
-    update.effective_message.reply_text("Please enter the trade that you would like to place.")
+    update.effective_message.reply_text("Veuillez saisir le trade que vous souhaitez effectuer.")
 
     return TRADE
     
@@ -459,14 +455,14 @@ def Calculation_Command(update: Update, context: CallbackContext) -> int:
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
     if(not(update.effective_message.chat.username == TELEGRAM_USER)):
-        update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
+        update.effective_message.reply_text("Vous n'êtes pas autorisé à utiliser ce robot ! 🙅🏽‍♂️")
         return ConversationHandler.END
 
     # initializes the user's trade as empty prior to input and parsing
     context.user_data['trade'] = None
 
     # asks user to enter the trade
-    update.effective_message.reply_text("Please enter the trade that you would like to calculate.")
+    update.effective_message.reply_text("Veuillez saisir le trade que vous souhaitez calculer.")
 
     return CALCULATE
 
