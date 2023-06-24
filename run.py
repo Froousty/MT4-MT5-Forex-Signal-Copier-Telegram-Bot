@@ -69,7 +69,6 @@ def ParseSignal(signal: str) -> dict:
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
     if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell'):
         trade['Entry'] = (signal[1].split())[-1]
-    
     else:
         trade['Entry'] = float((signal[1].split())[-1])
     
@@ -77,9 +76,10 @@ def ParseSignal(signal: str) -> dict:
     trade['TP'] = [float((signal[5].split())[-1])]
     
     # checks if there's a fourth line and parses it for TP2
-    if(len(signal) > 5):
-        trade['TP'].append(float(signal[6].split()[-1]))
     if(len(signal) > 6):
+        trade['TP'].append(float(signal[6].split()[-1]))
+        
+    if(len(signal) > 7):
         trade['TP'].append(float(signal[7].split()[-1]))
         
     trade['PositionSize'] = float((signal[2].split())[-1])
@@ -392,7 +392,7 @@ def help(update: Update, context: CallbackContext) -> None:
     market_execution_example = "Market Execution:\nBUY GBPUSD\nEntry NOW\nLOTS 0.01\nMultiplier 1\nSL 1.14336\nTP 1.28930\nTP 1.29845\nTP 1.29999\n\n"
     
     # sends messages to user
-    update.effective_message.reply_text(help_message)
+    # update.effective_message.reply_text(help_message)
     update.effective_message.reply_text(commands)
     update.effective_message.reply_text(trade_example + market_execution_example)
 
