@@ -147,10 +147,9 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     table.add_row([trade["OrderType"] , trade["Symbol"]])
     table.add_row(['Entry\n', trade['Entry']])
     
-    table.add_row(['\nPosition Size', trade['PositionSize']])
-    
-    table.add_row(['\nRisk', '\n{:,.0f} %'.format(risk)])
-    table.add_row(['\nMultiplier\n', trade['Multiplier']])
+    table.add_row(['Position Size', trade['PositionSize']])
+    table.add_row(['Risk', '\n{:,.0f} %'.format(risk)])
+    table.add_row(['Multiplier\n', trade['Multiplier']])
     
     table.add_row(['Stop Loss', '{} pips'.format(stopLossPips)])
     
