@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import asyncio
 import logging
-import math
 import os
 
 try:
@@ -82,9 +81,18 @@ def ParseSignal(signal: str) -> dict:
         trade['TP'].append(float(signal[6].split()[-1]))
     if(len(signal) > 6):
         trade['TP'].append(float(signal[7].split()[-1]))
-
+        
+    trade['PositionSize'] = float((signal[2].split())[-1])
     trade['Multiplier'] = float((signal[3].split())[-1])
-
+    
+    logger.info(trade['OrderType'])
+    logger.info(trade['Symbol'])
+    logger.info(trade['Entry'])
+    logger.info(trade['Multiplier'])
+    logger.info(trade['PositionSize'])
+    logger.info(trade['StopLoss'])
+    logger.info(trade['TP'])
+    
     return trade
     
 
@@ -98,19 +106,13 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     """
 
     # calculates the stop loss in pips
-    #stopLossPips = abs(round((trade['StopLoss'] - trade['Entry']) / multiplier))
     stopLossPips = abs(round((trade['StopLoss'] - trade['Entry']) / trade['Multiplier']))
 
-    # calculates the position size using stop loss and RISK FACTOR
-    #trade['PositionSize'] = math.floor(((balance * trade['RiskFactor']) / stopLossPips) / 10 * 100) / 100
-    trade['PositionSize'] = float((signal[2].split())[-1])
-    
     # calculates the take profit(s) in pips
     takeProfitPips = []
     for takeProfit in trade['TP']:
-        #takeProfitPips.append(abs(round((takeProfit - trade['Entry']) / multiplier)))
         takeProfitPips.append(abs(round((takeProfit - trade['Entry']) / trade['Multiplier'])))
-
+        
     # creates table with trade information
     table = CreateTable(trade, balance, stopLossPips, takeProfitPips)
     
@@ -135,16 +137,18 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     # creates prettytable object
     table = PrettyTable()
     
+    potentialLoss = round((trade['PositionSize'] * 10) * stopLossPips * len(takeProfitPips), 2)
+    risk = round(((potentialLoss * 100) / balance))
+    
     table.title = "Trade Information"
     table.field_names = ["Key", "Value"]
     table.align["Key"] = "l"  
     table.align["Value"] = "l" 
-    
     table.add_row([trade["OrderType"] , trade["Symbol"]])
     table.add_row(['Entry\n', trade['Entry']])
     
     table.add_row(['\nPosition Size', trade['PositionSize']])
-    risk = round(((potentialLoss * 100) / balance))
+    
     table.add_row(['\nRisk', '\n{:,.0f} %'.format(risk)])
     table.add_row(['\nMultiplier\n', trade['Multiplier']])
     
@@ -166,8 +170,6 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
         totalProfit += profit
 
     table.add_row(['\nTotal Profit', '\n$ {:,.2f}'.format(totalProfit)])
-    #round((trade['PositionSize'] * 10) * stopLossPips, 2)
-    potentialLoss = round((trade['PositionSize'] * 10) * stopLossPips * len(takeProfitPips), 2)
     table.add_row(['Potential Loss', '$ {:,.2f}'.format(potentialLoss)])
     
     return table
@@ -369,7 +371,7 @@ def welcome(update: Update, context: CallbackContext) -> None:
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
 
-    welcome_message = "Bienvenue sur le bot Telegram de FX Signal Copier ! 💻💸\NVous pouvez utiliser ce bot pour entrer dans les transactions directement à partir de Telegram et obtenir un aperçu détaillé de votre ratio risque-récompense avec le profit, la perte. Vous êtes en mesure de modifier des paramètres spécifiques tels que les symboles autorisés, le facteur de risque, et plus encore à partir de votre script Python personnalisé et des variables d'environnement.\nUtilisez la commande /help pour afficher des instructions et des exemples de transactions."
+    welcome_message = "Bienvenue sur le bot Telegram de FX Signal Copier ! 💻💸\nVous pouvez utiliser ce bot pour entrer dans les transactions directement à partir de Telegram et obtenir un aperçu détaillé de votre ratio risque-récompense avec le profit, la perte. Vous êtes en mesure de modifier des paramètres spécifiques tels que les symboles autorisés, le facteur de risque, et plus encore à partir de votre script Python personnalisé et des variables d'environnement.\nUtilisez la commande /help pour afficher des instructions et des exemples de transactions."
     
     # sends messages to user
     update.effective_message.reply_text(welcome_message)
