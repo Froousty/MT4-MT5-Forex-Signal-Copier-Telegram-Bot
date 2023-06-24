@@ -28,19 +28,12 @@ APP_URL = os.environ.get("APP_URL")
 # Port number for Telegram bot web hook
 PORT = int(os.environ.get('PORT', '8443'))
 
-
 # Enables logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # possibles states for conversation handler
 CALCULATE, TRADE, DECISION = range(3)
-
-# allowed FX symbols
-SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NOW', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD']
-
-# RISK FACTOR
-RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
 
 
 # Helper Functions
@@ -61,23 +54,11 @@ def ParseSignal(signal: str) -> dict:
     trade = {}
 
     # determines the order type of the trade
-    if('Buy Limit'.lower() in signal[0].lower()):
-        trade['OrderType'] = 'Buy Limit'
-
-    elif('Sell Limit'.lower() in signal[0].lower()):
-        trade['OrderType'] = 'Sell Limit'
-
-    elif('Buy Stop'.lower() in signal[0].lower()):
-        trade['OrderType'] = 'Buy Stop'
-
-    elif('Sell Stop'.lower() in signal[0].lower()):
-        trade['OrderType'] = 'Sell Stop'
-
+    if('Sell'.lower() in signal[0].lower()):
+        trade['OrderType'] = 'Sell'
+        
     elif('Buy'.lower() in signal[0].lower()):
         trade['OrderType'] = 'Buy'
-    
-    elif('Sell'.lower() in signal[0].lower()):
-        trade['OrderType'] = 'Sell'
     
     # returns an empty dictionary if an invalid order type was given
     else:
@@ -85,10 +66,6 @@ def ParseSignal(signal: str) -> dict:
 
     # extracts symbol from trade signal
     trade['Symbol'] = (signal[0].split())[-1].upper()
-    
-    # checks if the symbol is valid, if not, returns an empty dictionary
-    #if(trade['Symbol'] not in SYMBOLS):
-        #return {}
     
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
     if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell'):
@@ -99,7 +76,7 @@ def ParseSignal(signal: str) -> dict:
     
     trade['StopLoss'] = float((signal[4].split())[-1])
     trade['TP'] = [float((signal[5].split())[-1])]
-
+    
     # checks if there's a fourth line and parses it for TP2
     if(len(signal) > 5):
         trade['TP'].append(float(signal[6].split()[-1]))
@@ -107,11 +84,9 @@ def ParseSignal(signal: str) -> dict:
         trade['TP'].append(float(signal[7].split()[-1]))
 
     trade['Multiplier'] = float((signal[3].split())[-1])
-    
-    # adds risk factor to trade
-    #trade['RiskFactor'] = RISK_FACTOR
 
     return trade
+    
 
 def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     """Calculates information from given trade including stop loss and take profit in pips, posiition size, and potential loss/profit.
@@ -121,19 +96,6 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
         trade: dictionary that stores trade information
         balance: current balance of the MetaTrader account
     """
-
-    # calculates the stop loss in pips
-    # if(trade['Symbol'] == 'XAUUSD'):
-    #     multiplier = 0.1
-
-    # elif(trade['Symbol'] == 'XAGUSD'):
-    #     multiplier = 0.001
-
-    # elif(str(trade['Entry']).index('.') >= 2):
-    #     multiplier = 0.01
-
-    # else:
-    #     multiplier = 0.0001
 
     # calculates the stop loss in pips
     #stopLossPips = abs(round((trade['StopLoss'] - trade['Entry']) / multiplier))
@@ -156,6 +118,7 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
 
     return
+    
 
 def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: int) -> PrettyTable:
     """Creates PrettyTable object to display trade information to user.
@@ -208,6 +171,7 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     table.add_row(['Potential Loss', '$ {:,.2f}'.format(potentialLoss)])
     
     return table
+    
 
 async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
     """Attempts connection to MetaAPI and MetaTrader to place trade.
@@ -277,32 +241,12 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                         # result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
                         result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'], trade['StopLoss'], takeProfit)
 
-                # executes buy limit order
-                # elif(trade['OrderType'] == 'Buy Limit'):
-                #     for takeProfit in trade['TP']:
-                #         result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-
-                # # executes buy stop order
-                # elif(trade['OrderType'] == 'Buy Stop'):
-                #     for takeProfit in trade['TP']:
-                #         result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-
                 # executes sell market execution order
                 elif(trade['OrderType'] == 'Sell'):
                     for takeProfit in trade['TP']:
                         # result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
                         result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'], trade['StopLoss'], takeProfit)
-
-                # executes sell limit order
-                # elif(trade['OrderType'] == 'Sell Limit'):
-                #     for takeProfit in trade['TP']:
-                #         result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-
-                # # executes sell stop order
-                # elif(trade['OrderType'] == 'Sell Stop'):
-                #     for takeProfit in trade['TP']:
-                #         result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-                
+             
                 # sends success message to user
                 update.effective_message.reply_text("Trade entered successfully! 💰")
                 
@@ -360,6 +304,7 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
     context.user_data['trade'] = None
 
     return ConversationHandler.END
+    
 
 def CalculateTrade(update: Update, context: CallbackContext) -> int:
     """Parses trade and places on MetaTrader account.   
@@ -399,6 +344,7 @@ def CalculateTrade(update: Update, context: CallbackContext) -> int:
     update.effective_message.reply_text("Would you like to enter this trade?\nTo enter, select: /yes\nTo decline, select: /no")
 
     return DECISION
+    
 
 def unknown_command(update: Update, context: CallbackContext) -> None:
     """Checks if the user is authorized to use this bot or shares to use /help command for instructions.
@@ -431,6 +377,7 @@ def welcome(update: Update, context: CallbackContext) -> None:
     update.effective_message.reply_text(welcome_message)
 
     return
+    
 
 def help(update: Update, context: CallbackContext) -> None:
     """Sends a help message when the command /help is issued
@@ -453,6 +400,7 @@ def help(update: Update, context: CallbackContext) -> None:
     update.effective_message.reply_text(trade_example + market_execution_example + limit_example + note)
 
     return
+    
 
 def cancel(update: Update, context: CallbackContext) -> int:
     """Cancels and ends the conversation.   
@@ -468,6 +416,7 @@ def cancel(update: Update, context: CallbackContext) -> int:
     context.user_data['trade'] = None
 
     return ConversationHandler.END
+    
 
 def error(update: Update, context: CallbackContext) -> None:
     """Logs Errors caused by updates.
@@ -480,6 +429,7 @@ def error(update: Update, context: CallbackContext) -> None:
     logger.warning('Update "%s" caused error "%s"', update, context.error)
 
     return
+    
 
 def Trade_Command(update: Update, context: CallbackContext) -> int:
     """Asks user to enter the trade they would like to place.
@@ -499,6 +449,7 @@ def Trade_Command(update: Update, context: CallbackContext) -> int:
     update.effective_message.reply_text("Please enter the trade that you would like to place.")
 
     return TRADE
+    
 
 def Calculation_Command(update: Update, context: CallbackContext) -> int:
     """Asks user to enter the trade they would like to calculate trade information for.
