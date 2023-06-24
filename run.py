@@ -149,9 +149,9 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     
     table.add_row(['Position Size', trade['PositionSize']])
     table.add_row(['Risk', '{:,.0f} %'.format(risk)])
-    table.add_row(['Multiplier', '\n'trade['Multiplier']])
+    table.add_row(['Multiplier', trade['Multiplier']])
     
-    table.add_row(['\nStop Loss', '{} pips'.format(stopLossPips)])
+    table.add_row(['\nStop Loss', '\n{} pips'.format(stopLossPips)])
     
     for count, takeProfit in enumerate(takeProfitPips):
         table.add_row([f'TP {count + 1}', f'{takeProfit} pips'])
