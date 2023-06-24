@@ -149,7 +149,7 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     
     table.add_row(['Position Size', trade['PositionSize']])
     table.add_row(['Risk', '{:,.0f} %'.format(risk)])
-    table.add_row(['Multiplier', trade['Multiplier']])
+    table.add_row(['Multiplier', '\n'trade['Multiplier']])
     
     table.add_row(['\nStop Loss', '{} pips'.format(stopLossPips)])
     
@@ -340,7 +340,7 @@ def CalculateTrade(update: Update, context: CallbackContext) -> int:
     asyncio.run(ConnectMetaTrader(update, context.user_data['trade'], False))
 
     # asks if user if they would like to enter or decline trade
-    update.effective_message.reply_text("Souhaitez-vous envoyer cette transaction ? Pour l'envoyer, sélectionnez : /oui\nPour annuler, sélectionnez : /non")
+    update.effective_message.reply_text("Souhaitez-vous envoyer cette transaction ? Pour l'envoyer, sélectionnez : /yes\nPour annuler, sélectionnez : /no")
 
     return DECISION
     
