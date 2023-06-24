@@ -386,7 +386,7 @@ def help(update: Update, context: CallbackContext) -> None:
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
 
-    help_message = "Ce robot est utilisé pour entrer automatiquement des transactions sur votre compte MetaTrader directement à partir de Telegram. Pour commencer, assurez-vous que vous êtes autorisé à utiliser ce robot en ajustant votre script Python ou vos variables d'environnement.\nAprès une longue période d'absence du robot, assurez-vous de saisir à nouveau la commande start pour redémarrer la connexion à votre compte MetaTrader."
+    # help_message = "Ce robot est utilisé pour entrer automatiquement des transactions sur votre compte MetaTrader directement à partir de Telegram. Pour commencer, assurez-vous que vous êtes autorisé à utiliser ce robot en ajustant votre script Python ou vos variables d'environnement.\nAprès une longue période d'absence du robot, assurez-vous de saisir à nouveau la commande start pour redémarrer la connexion à votre compte MetaTrader."
     commands = "Liste des commandes:\n/start : affiche le message de bienvenue\n/help : affiche la liste des commandes et des exemples de transactions\n/trade : prend en charge la transaction saisie par l'utilisateur pour l'analyser et la placer\n/calculate : calcule les informations de transaction pour une transaction saisie par l'utilisateur."
     trade_example = "Example Trades 💴:\n\n"
     market_execution_example = "Market Execution:\nBUY GBPUSD\nEntry NOW\nLOTS 0.01\nMultiplier 1\nSL 1.14336\nTP 1.28930\nTP 1.29845\nTP 1.29999\n\n"
