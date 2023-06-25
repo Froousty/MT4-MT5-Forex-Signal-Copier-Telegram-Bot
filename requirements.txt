@@ -41,3 +41,17 @@ wcwidth==0.2.5
 websockets==9.1
 Werkzeug==2.1.2
 yarl==1.7.2
+aiohttp-retry==2.8.3
+clean-text==0.6.0
+emoji==1.7.0
+frozenlist==1.3.3
+ftfy==6.1.1
+numpy==1.25.0
+packaging==23.1
+pyaes==1.6.1
+pyasn1==0.5.0
+rsa==4.9
+setuptools==68.0.0
+Telethon==1.28.5
+Unidecode==1.3.6
+wheel==0.38.4
