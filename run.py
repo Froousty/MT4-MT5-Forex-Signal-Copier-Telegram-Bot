@@ -13,6 +13,130 @@ from prettytable import PrettyTable
 from telegram import ParseMode, Update
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater, ConversationHandler, CallbackContext
 
+from telethon import TelegramClient, events
+from cleantext import clean
+
+# Valeurs issues de my.telegram.org
+api_id = 29579402
+api_hash = '6448dd53b08c9be22892bf3fa52a2aa1'
+
+client = TelegramClient('Service', api_id, api_hash)
+channel = 816043344
+#Channel Test Python
+ChatBot = 'https://t.me/CodeTGMT4_bot'
+#Canal test CodeTGMT4
+
+SYMBOLES = (
+    'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
+    'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY',
+    'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD', 'DAX40', 'DJ30', 'US30', 'ETHUSD', 'BTCUSD')
+SYMBOLES_FXLIFT = (
+    'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
+    'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY',
+    'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD', 'GER40_U3', 'US30Cash', 'US30Cash', 'ETHUSD', 'BTCUSD')
+MULTIPLIER = (
+    '0,0001', '0,0001', '0,01', '0,0001', '0,0001', '0,0001', '0,01', '0,01', '0,0001', '0,0001', '0,0001', '0,0001',
+    '0,01', '0,0001', '0,0001', '0,0001', '0,0001', '0,0001', '0,01', '0,0001', '0,0001', '0,0001', '0,0001', '0,01',
+    '0,0001', '0,0001', '0,0001', '0,01', '0,01', '0,01', '1', '1', '1', '1', '1')
+# ^ Sur une paire de devises à 5 décimales, un pip est de 0,0001
+# | Sur une paire de devises à 3 décimales, un pip est de 0,01
+# | Sur une paire de devises à 2 décimales, un pip est de 0,1
+
+InfoTrade = {}
+client.start()
+
+
+@client.on(events.NewMessage(chats=channel))
+async def message_handler(event):
+    message = event.message.text
+    message = clean(message, no_emoji=True,lower=False)
+    message = message.splitlines()
+    message = [line.rstrip() for line in message] # ['alerte', "j'achete le gold (xauusd) a 1936", 'stop loss : 1926', 'take profit 1 : 1945', 'take profit 2 : 2020']
+
+    try:
+        if message[0].split()[0].lower()[0:6] == 'alerte':
+            # Détermine si c'est un BUY ou un SELL
+            if "J'achete" in message[1][0:8]:
+                InfoTrade['TypeOrdre'] = 'BUY'
+            elif "Je vends" in message[1][0:8]:
+                InfoTrade['TypeOrdre'] = 'SELL'
+            else:
+                return {}
+
+            # Extrait le symbole du signal
+            AnalyseSYMBOLES = message[1].split()
+            for i in range(len(AnalyseSYMBOLES)):
+                if '(' in AnalyseSYMBOLES[i]:
+                    AnalyseSYMBOLES[i] = AnalyseSYMBOLES[i].removeprefix('(')
+                    AnalyseSYMBOLES[i] = AnalyseSYMBOLES[i].removesuffix(')')
+                else:
+                    AnalyseSYMBOLES[i] = AnalyseSYMBOLES[i]
+                if AnalyseSYMBOLES[i] in SYMBOLES:
+                    SymbolesLOTS = AnalyseSYMBOLES[i]
+                    indice = SYMBOLES.index(AnalyseSYMBOLES[i])
+                    InfoTrade['Symbole'] = SYMBOLES_FXLIFT[indice]
+                    InfoTrade['Multiplier'] = MULTIPLIER[indice]
+                else:
+                    continue
+
+            # Extrait le SL du signal en ajoutant l'écart des marchées entres les brokers pour certains symboles
+            if InfoTrade['Symbole'] == 'GER40_U3':
+                InfoTrade['StopLoss'] = float(message[2].split(': ')[1].split(' ')[0]) + 140
+            else:
+                InfoTrade['StopLoss'] = message[2].split(': ')[1].split(' ')[0]
+
+            # Extrait les TPs du signal en ajoutant l'écart des marchées entres les brokers pour certains symboles
+            y = 0
+            for j in range(len(message)):
+                if message[j].split()[0] == 'Take':
+                    y = y + 1
+                    if y == 1:
+                        if InfoTrade['Symbole'] == 'GER40_U3':
+                            InfoTrade['TakeProfits'] = [float(message[j].split(': ')[1].split(' ')[0]) + 140]
+                        else:
+                            InfoTrade['TakeProfits'] = [message[j].split(': ')[1].split(' ')[0]]
+                    else:
+                        if InfoTrade['Symbole'] == 'GER40_U3':
+                            InfoTrade['TakeProfits'].append(float(message[j].split(': ')[1].split(' ')[0]) + 140)
+                        else:
+                            InfoTrade['TakeProfits'].append(message[j].split(': ')[1].split(' ')[0])
+                else:
+                    continue
+
+            # Attributions des lots fixes selon le symbole
+            if SymbolesLOTS == 'ETHUSD':
+                InfoTrade['Lots'] = 0.07
+            elif SymbolesLOTS == 'BTCUSD':
+                InfoTrade['Lots'] = 0.02
+            elif SymbolesLOTS == 'XAUUSD':
+                InfoTrade['Lots'] = 0.01
+            elif SymbolesLOTS == 'DAX40' or SymbolesLOTS == 'DJ30' or SymbolesLOTS == 'US30':
+                InfoTrade['Lots'] = 0.01
+            # elif SYMBOLES = '':
+            #     InfoTrade['Lots'] =
+            else:
+                InfoTrade['Lots'] = 0.02
+
+            if len(InfoTrade['TakeProfits']) == 1:
+                MessageSIGNAL = f"{InfoTrade['TypeOrdre']} {InfoTrade['Symbole']} \nEntry NOW\nLOTS {InfoTrade['Lots']}\nMultiplier {InfoTrade['Multiplier']}\nSL {InfoTrade['StopLoss']}\nTP {InfoTrade['TakeProfits'][0]}"
+            elif len(InfoTrade['TakeProfits']) == 2:
+                MessageSIGNAL = f"{InfoTrade['TypeOrdre']} {InfoTrade['Symbole']} \nEntry NOW\nLOTS {InfoTrade['Lots']}\nMultiplier {InfoTrade['Multiplier']}\nSL {InfoTrade['StopLoss']}\nTP {InfoTrade['TakeProfits'][0]}\nTP {InfoTrade['TakeProfits'][1]}"
+            elif len(InfoTrade['TakeProfits']) >= 3:
+                MessageSIGNAL = f"{InfoTrade['TypeOrdre']} {InfoTrade['Symbole']} \nEntry NOW\nLOTS {InfoTrade['Lots']}\nMultiplier {InfoTrade['Multiplier']}\nSL {InfoTrade['StopLoss']}\nTP {InfoTrade['TakeProfits'][0]}\nTP {InfoTrade['TakeProfits'][1]}\nTP {InfoTrade['TakeProfits'][2]}"
+
+            print(MessageSIGNAL)
+
+            await client.send_message(ChatBot, '/trade')
+            await client.send_message(ChatBot, MessageSIGNAL)
+
+    except Exception as error:
+        Erreur =(f"There was an issue😕\n\nError Message:\n{error}")
+        await client.send_message(ChatBot, Erreur)
+
+    return
+
+client.run_until_disconnected()
+
 # MetaAPI Credentials
 API_KEY = os.environ.get("API_KEY")
 ACCOUNT_ID = os.environ.get("ACCOUNT_ID")
