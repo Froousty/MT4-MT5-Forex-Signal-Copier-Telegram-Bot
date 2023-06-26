@@ -17,14 +17,13 @@ from telethon import TelegramClient, events
 from cleantext import clean
 
 # Valeurs issues de my.telegram.org
-api_id = 29579402
-api_hash = '6448dd53b08c9be22892bf3fa52a2aa1'
+API_ID = os.environ.get("API_ID") #29579402
+API_HASH = os.environ.get("API_HASH") #'6448dd53b08c9be22892bf3fa52a2aa1'
 
-client = TelegramClient('Service', api_id, api_hash)
-channel = 816043344
-#Channel Test Python
-ChatBot = 'https://t.me/CodeTGMT4_bot'
-#Canal test CodeTGMT4
+NAME_CHANNEL_SOURCE = os.environ.get("NAME_CHANNEL_SOURCE") #Channel Test Python (816043344)
+BOT_CHANNEL_SOURCE = os.environ.get("BOT_CHANNEL_SOURCE") #Canal test CodeTGMT4('https://t.me/CodeTGMT4_bot')
+
+client = TelegramClient('Service', API_ID, API_HASH)
 
 SYMBOLES = (
     'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
@@ -46,7 +45,7 @@ InfoTrade = {}
 client.start()
 
 
-@client.on(events.NewMessage(chats=channel))
+@client.on(events.NewMessage(chats=NAME_CHANNEL_SOURCE))
 async def message_handler(event):
     message = event.message.text
     message = clean(message, no_emoji=True,lower=False)
@@ -126,12 +125,12 @@ async def message_handler(event):
 
             print(MessageSIGNAL)
 
-            await client.send_message(ChatBot, '/trade')
-            await client.send_message(ChatBot, MessageSIGNAL)
+            await client.send_message(BOT_CHANNEL_SOURCE, '/trade')
+            await client.send_message(BOT_CHANNEL_SOURCE, MessageSIGNAL)
 
     except Exception as error:
         Erreur =(f"There was an issue😕\n\nError Message:\n{error}")
-        await client.send_message(ChatBot, Erreur)
+        await client.send_message(BOT_CHANNEL_SOURCE, Erreur)
 
     return
 
