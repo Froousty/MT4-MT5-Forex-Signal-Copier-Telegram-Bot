@@ -17,11 +17,11 @@ from telethon import TelegramClient, events
 from cleantext import clean
 
 # Valeurs issues de my.telegram.org
-API_ID = os.environ.get("API_ID") #29579402
-API_HASH = os.environ.get("API_HASH") #'6448dd53b08c9be22892bf3fa52a2aa1'
+API_ID = os.environ.get("API_ID")
+API_HASH = os.environ.get("API_HASH")
 
-NAME_CHANNEL_SOURCE = os.environ.get("NAME_CHANNEL_SOURCE") #Channel Test Python (816043344)
-BOT_CHANNEL_SOURCE = os.environ.get("BOT_CHANNEL_SOURCE") #Canal test CodeTGMT4('https://t.me/CodeTGMT4_bot')
+NAME_CHANNEL_SOURCE = os.environ.get("NAME_CHANNEL_SOURCE") #Channel Test Python
+BOT_CHANNEL_SOURCE = os.environ.get("BOT_CHANNEL_SOURCE") #Canal test CodeTGMT4
 
 client = TelegramClient('Service', API_ID, API_HASH)
 
