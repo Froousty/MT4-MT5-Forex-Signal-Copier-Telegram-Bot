@@ -44,7 +44,7 @@ MULTIPLIER = (
 # | Sur une paire de devises à 2 décimales, un pip est de 0,1
 
 InfoTrade = {}
-client.start(phone=PHONE,password=PASSWORD,code_callback=None)
+client.start(phone=PHONE,password=PASSWORD)
 
 
 @client.on(events.NewMessage(chats=NAME_CHANNEL_SOURCE))
