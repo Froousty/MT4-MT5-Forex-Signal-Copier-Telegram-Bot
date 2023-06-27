@@ -25,9 +25,7 @@ PASSWORD = os.environ.get("PASSWORD")
 NAME_CHANNEL_SOURCE = os.environ.get("NAME_CHANNEL_SOURCE") #Channel Test Python
 BOT_CHANNEL_SOURCE = os.environ.get("BOT_CHANNEL_SOURCE") #Canal test CodeTGMT4
 
-client = TelegramClient('Service', API_ID, API_HASH)
-client.start()
-client.send_code_request(PHONE)
+client = TelegramClient('Service', API_ID, API_HASH).start(phone=PHONE, force_sms=True)
 
 SYMBOLES = (
     'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
