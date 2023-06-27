@@ -2,6 +2,7 @@
 import asyncio
 import logging
 import os
+import telethon
 
 try:
     from typing import Literal
@@ -55,8 +56,8 @@ async def main(client: telethon.TelegramClient):
         except:
             await qr_login.recreate()
 
-client = TelegramClient(None, TELEGRAM_API_ID, API_HASH)
-#client.loop.run_until_complete(main(client))
+client = TelegramClient(None, api_id, api_hash)
+client.loop.run_until_complete(main(client))
 #client = TelegramClient('Service', API_ID, API_HASH).start(phone=PHONE, force_sms=True)
 
 SYMBOLES = (
