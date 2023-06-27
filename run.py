@@ -20,12 +20,18 @@ from qrcode import QRCode
 
 # Valeurs issues de my.telegram.org
 API_ID = os.environ.get("API_ID")
+print(API_ID)
 API_HASH = os.environ.get("API_HASH")
+print(API_HASH)
 PHONE = os.environ.get("PHONE")
+print(PHONE)
 PASSWORD = os.environ.get("PASSWORD")
+print(PASSWORD)
 
 NAME_CHANNEL_SOURCE = os.environ.get("NAME_CHANNEL_SOURCE") #Channel Test Python
+print(NAME_CHANNEL_SOURCE)
 BOT_CHANNEL_SOURCE = os.environ.get("BOT_CHANNEL_SOURCE") #Canal test CodeTGMT4
+print(BOT_CHANNEL_SOURCE)
 
 qr = QRCode()
 
@@ -58,7 +64,6 @@ async def main(client: telethon.TelegramClient):
 
 client = TelegramClient(None, API_ID, API_HASH)
 client.loop.run_until_complete(main(client))
-#client = TelegramClient('Service', API_ID, API_HASH).start(phone=PHONE, force_sms=True)
 
 SYMBOLES = (
     'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
@@ -77,7 +82,6 @@ MULTIPLIER = (
 # | Sur une paire de devises à 2 décimales, un pip est de 0,1
 
 InfoTrade = {}
-#client.start(phone=PHONE,password=PASSWORD)
 
 
 @client.on(events.NewMessage(chats=NAME_CHANNEL_SOURCE))
