@@ -20,6 +20,8 @@ from cleantext import clean
 API_ID = os.environ.get("API_ID")
 API_HASH = os.environ.get("API_HASH")
 PHONE = os.environ.get("PHONE")
+PASSWORD = os.environ.get("PASSWORD")
+
 NAME_CHANNEL_SOURCE = os.environ.get("NAME_CHANNEL_SOURCE") #Channel Test Python
 BOT_CHANNEL_SOURCE = os.environ.get("BOT_CHANNEL_SOURCE") #Canal test CodeTGMT4
 
@@ -42,7 +44,7 @@ MULTIPLIER = (
 # | Sur une paire de devises à 2 décimales, un pip est de 0,1
 
 InfoTrade = {}
-client.start(phone=PHONE,code_callback=None)
+client.start(phone=PHONE,password=PASSWORD,code_callback=None)
 
 
 @client.on(events.NewMessage(chats=NAME_CHANNEL_SOURCE))
