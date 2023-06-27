@@ -15,6 +15,7 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, Updater, Conve
 
 from telethon import TelegramClient, events
 from cleantext import clean
+from qrcode import QRCode
 
 # Valeurs issues de my.telegram.org
 API_ID = os.environ.get("API_ID")
@@ -25,7 +26,38 @@ PASSWORD = os.environ.get("PASSWORD")
 NAME_CHANNEL_SOURCE = os.environ.get("NAME_CHANNEL_SOURCE") #Channel Test Python
 BOT_CHANNEL_SOURCE = os.environ.get("BOT_CHANNEL_SOURCE") #Canal test CodeTGMT4
 
-client = TelegramClient('Service', API_ID, API_HASH).start(phone=PHONE, force_sms=True)
+qr = QRCode()
+
+
+def gen_qr(token:str):
+    qr.clear()
+    qr.add_data(token)
+    qr.print_ascii()
+
+
+def display_url_as_qr(url):
+    print(url)  # do whatever to show url as a qr to the user
+    gen_qr(url)
+
+
+async def main(client: telethon.TelegramClient):
+    if(not client.is_connected()):
+        await client.connect()
+    await client.connect()
+    qr_login = await client.qr_login()
+    print(client.is_connected())
+    r = False
+    while not r:
+        display_url_as_qr(qr_login.url)
+        # Important! You need to wait for the login to complete!
+        try:
+            r = await qr_login.wait(10)
+        except:
+            await qr_login.recreate()
+
+client = TelegramClient(None, TELEGRAM_API_ID, API_HASH)
+#client.loop.run_until_complete(main(client))
+#client = TelegramClient('Service', API_ID, API_HASH).start(phone=PHONE, force_sms=True)
 
 SYMBOLES = (
     'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
