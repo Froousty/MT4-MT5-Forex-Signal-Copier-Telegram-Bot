@@ -52,7 +52,7 @@ async def main(client: telethon.TelegramClient):
         display_url_as_qr(qr_login.url)
         # Important! You need to wait for the login to complete!
         try:
-            r = await qr_login.wait(10)
+            r = await qr_login.wait(20)
         except:
             await qr_login.recreate()
 
