@@ -62,7 +62,7 @@ async def main(client: telethon.TelegramClient):
         except:
             await qr_login.recreate()
 
-client = TelegramClient(None, API_ID, API_HASH)
+client = TelegramClient("Programme", API_ID, API_HASH)
 client.loop.run_until_complete(main(client))
 
 SYMBOLES = (
