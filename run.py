@@ -66,6 +66,7 @@ async def main(client: telethon.TelegramClient):
     
 client = TelegramClient("Programme", API_ID, API_HASH)
 client.loop.run_until_complete(main(client))
+print(client)
 
 SYMBOLES = (
     'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
