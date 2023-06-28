@@ -87,7 +87,7 @@ MULTIPLIER = (
 InfoTrade = {}
 
 
-async def Gotest():
+def Gotest():
     # Getting information about yourself
     me = await client.get_me()
 
