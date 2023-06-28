@@ -176,7 +176,7 @@ async def message_handler(event):
 
     return
 
-client.run_until_disconnected()
+# client.run_until_disconnected()
 
 
 # async def Gotest():
