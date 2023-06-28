@@ -85,7 +85,7 @@ MULTIPLIER = (
 
 InfoTrade = {}
 
-# client = TelegramClient("Programme", API_ID, API_HASH)
+client = TelegramClient("Programme", API_ID, API_HASH)
 
 @client.on(events.NewMessage(chats=NAME_CHANNEL_SOURCE))
 async def message_handler(event):
