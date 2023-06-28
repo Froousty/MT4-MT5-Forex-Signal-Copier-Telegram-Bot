@@ -61,7 +61,8 @@ async def main(client: telethon.TelegramClient):
             r = await qr_login.wait(20)
         except:
             await qr_login.recreate()
-
+    print('Connexion Done')
+    
 client = TelegramClient("Programme", API_ID, API_HASH)
 client.loop.run_until_complete(main(client))
 
