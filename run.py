@@ -33,6 +33,24 @@ print(NAME_CHANNEL_SOURCE)
 BOT_CHANNEL_SOURCE = os.environ.get("BOT_CHANNEL_SOURCE") #Canal test CodeTGMT4
 print(BOT_CHANNEL_SOURCE)
 
+SYMBOLES = (
+    'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
+    'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY',
+    'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD', 'DAX40', 'DJ30', 'US30', 'ETHUSD', 'BTCUSD')
+SYMBOLES_FXLIFT = (
+    'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
+    'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY',
+    'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD', 'GER40_U3', 'US30Cash', 'US30Cash', 'ETHUSD', 'BTCUSD')
+MULTIPLIER = (
+    '0,0001', '0,0001', '0,01', '0,0001', '0,0001', '0,0001', '0,01', '0,01', '0,0001', '0,0001', '0,0001', '0,0001',
+    '0,01', '0,0001', '0,0001', '0,0001', '0,0001', '0,0001', '0,01', '0,0001', '0,0001', '0,0001', '0,0001', '0,01',
+    '0,0001', '0,0001', '0,0001', '0,01', '0,01', '0,01', '1', '1', '1', '1', '1')
+# ^ Sur une paire de devises à 5 décimales, un pip est de 0,0001
+# | Sur une paire de devises à 3 décimales, un pip est de 0,01
+# | Sur une paire de devises à 2 décimales, un pip est de 0,1
+
+InfoTrade = {}
+
 qr = QRCode()
 
 
@@ -67,23 +85,6 @@ async def main(client: telethon.TelegramClient):
 client = TelegramClient("Programme", API_ID, API_HASH)
 client.loop.run_until_complete(main(client))
 
-SYMBOLES = (
-    'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
-    'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY',
-    'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD', 'DAX40', 'DJ30', 'US30', 'ETHUSD', 'BTCUSD')
-SYMBOLES_FXLIFT = (
-    'AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP',
-    'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY',
-    'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD', 'GER40_U3', 'US30Cash', 'US30Cash', 'ETHUSD', 'BTCUSD')
-MULTIPLIER = (
-    '0,0001', '0,0001', '0,01', '0,0001', '0,0001', '0,0001', '0,01', '0,01', '0,0001', '0,0001', '0,0001', '0,0001',
-    '0,01', '0,0001', '0,0001', '0,0001', '0,0001', '0,0001', '0,01', '0,0001', '0,0001', '0,0001', '0,0001', '0,01',
-    '0,0001', '0,0001', '0,0001', '0,01', '0,01', '0,01', '1', '1', '1', '1', '1')
-# ^ Sur une paire de devises à 5 décimales, un pip est de 0,0001
-# | Sur une paire de devises à 3 décimales, un pip est de 0,01
-# | Sur une paire de devises à 2 décimales, un pip est de 0,1
-
-InfoTrade = {}
 
 client = TelegramClient("Programme", API_ID, API_HASH)
 
