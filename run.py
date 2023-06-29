@@ -87,6 +87,8 @@ client.loop.run_until_complete(main(client))
 
 
 client = TelegramClient("Programme", API_ID, API_HASH)
+client.start()
+
 
 @client.on(events.NewMessage(chats=[NAME_CHANNEL_SOURCE]))
 async def message_handler(event):
