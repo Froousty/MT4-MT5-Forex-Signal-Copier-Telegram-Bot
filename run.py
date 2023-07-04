@@ -85,13 +85,13 @@ def ParseSignal(signal: str) -> dict:
     trade['PositionSize'] = float((signal[2].split())[-1])
     trade['Multiplier'] = float((signal[3].split())[-1])
     
-    logger.info(trade['OrderType'])
-    logger.info(trade['Symbol'])
-    logger.info(trade['Entry'])
-    logger.info(trade['Multiplier'])
-    logger.info(trade['PositionSize'])
-    logger.info(trade['StopLoss'])
-    logger.info(trade['TP'])
+    # logger.info(trade['OrderType'])
+    # logger.info(trade['Symbol'])
+    # logger.info(trade['Entry'])
+    # logger.info(trade['Multiplier'])
+    # logger.info(trade['PositionSize'])
+    # logger.info(trade['StopLoss'])
+    # logger.info(trade['TP'])
     
     return trade
     
