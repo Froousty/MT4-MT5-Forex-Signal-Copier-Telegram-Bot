@@ -82,8 +82,10 @@ def ParseSignal(signal: str) -> dict:
     if(len(signal) > 7):
         trade['TP'].append(float(signal[7].split()[-1]))
         
-    trade['PositionSize'] = float((signal[2].split())[-1])
-    trade['Multiplier'] = float((signal[3].split())[-1])
+    # trade['PositionSize'] = float((signal[2].split())[-1])
+    # trade['Multiplier'] = float((signal[3].split())[-1])
+    trade['PositionSize'] = (signal[2].split())[-1]
+    trade['Multiplier'] = (signal[3].split())[-1]
     
     # logger.info(trade['OrderType'])
     # logger.info(trade['Symbol'])
